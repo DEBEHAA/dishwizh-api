@@ -22,7 +22,7 @@ const app = express();
 app.use(express.json());
 
 // CORS setup
-const allowedOrigins = [process.env.FRONTEND_URL || 'http://localhost:3000'];
+const allowedOrigins = [process.env.FRONTEND_URL || 'http://localhost:5173']; // Your frontend origin
 app.use(cors({
   origin: allowedOrigins,
   credentials: true,
