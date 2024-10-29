@@ -1,4 +1,3 @@
-// routes/recipe.js
 const express = require('express');
 const router = express.Router();
 const Recipe = require('../models/Recipe');
@@ -17,7 +16,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Fetch all recipes for a specific user
-router.get('/:userId', async (req, res) => {
+router.get('/user/:userId', async (req, res) => {
   try {
     const recipes = await Recipe.find({ userId: req.params.userId });
     res.json(recipes);
@@ -43,9 +42,9 @@ router.post('/', upload.single('image'), async (req, res) => {
       userId,
       recipeName,
       cuisineType,
-      ingredients: ingredients ? ingredients.split(',').map(item => item.trim()) : [], // Convert string to array
+      ingredients: ingredients ? ingredients.split(',').map(item => item.trim()) : [],
       steps,
-      imageUrl: req.file ? `/uploads/${req.file.filename}` : null // Save image URL if uploaded
+      imageUrl: req.file ? `/uploads/${req.file.filename}` : null // Correct syntax for saving image URL
     });
     await recipe.save();
     res.status(201).json({ message: 'Recipe added successfully!', recipe });
