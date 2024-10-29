@@ -1,8 +1,9 @@
-const express = require('express');
+import express from 'express';
+import multer from 'multer';
+import path from 'path';
+import Recipe from '../models/Recipe.js'; // Make sure the path is correct for your file structure
+
 const router = express.Router();
-const Recipe = require('../models/Recipe');
-const multer = require('multer');
-const path = require('path');
 
 // Configure Multer for file upload
 const storage = multer.diskStorage({
@@ -99,4 +100,4 @@ router.delete('/:recipeId', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

@@ -1,5 +1,6 @@
-const express = require('express');
-const Chef = require('../models/Chef');
+import express from 'express';
+import Chef from '../models/Chef.js'; 
+
 const router = express.Router();
 
 // Get chef details by userId
@@ -75,4 +76,4 @@ router.put('/:userId', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
