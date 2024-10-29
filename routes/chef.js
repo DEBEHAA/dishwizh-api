@@ -1,5 +1,5 @@
 const express = require('express');
-const Chef = require('../models/chef.js');
+const Chef = require('../models/Chef.js');
 const router = express.Router();
 
 // Get chef details by userId
