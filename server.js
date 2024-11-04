@@ -3,15 +3,17 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
+import dotenv from 'dotenv';
 
 import authRoutes from './routes/auth.js';
 import chefRouter from './routes/chef.js';
 import recipeRoutes from './routes/recipe.js';
 
+dotenv.config(); // Load environment variables from .env file
+
 const app = express();
 
 // Middleware setup
-app.use(express.json());
 app.use(cors());
 
 // Ensure uploads directory exists
@@ -21,7 +23,12 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI)
+const mongoURI = process.env.MONGODB_URI;
+if (!mongoURI) {
+  throw new Error('MONGODB_URI is undefined. Please check your .env file.');
+}
+
+mongoose.connect(mongoURI)
   .then(() => console.log('Connected to MongoDB Atlas'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
