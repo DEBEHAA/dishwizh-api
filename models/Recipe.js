@@ -1,4 +1,6 @@
+
 import mongoose from 'mongoose';
+
 
 const recipeSchema = new mongoose.Schema({
   userId: {
@@ -15,6 +17,7 @@ const recipeSchema = new mongoose.Schema({
     required: true
   },
   ingredients: {
+
     type: [String], 
     required: true
   },
@@ -24,6 +27,7 @@ const recipeSchema = new mongoose.Schema({
   },
   imageUrl: {
     type: String, 
+
     required: false
   },
   createdAt: {
@@ -32,4 +36,6 @@ const recipeSchema = new mongoose.Schema({
   }
 });
 
+
 export default mongoose.model('Recipe', recipeSchema);
+

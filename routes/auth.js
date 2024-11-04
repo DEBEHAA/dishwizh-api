@@ -1,6 +1,8 @@
+
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import User from '../models/User.js';  // Ensure the path is correct for your setup
+
 
 const router = express.Router();
 
@@ -47,3 +49,4 @@ router.post('/login', async (req, res) => {
 });
 
 export default router;
+

@@ -1,9 +1,11 @@
+
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import Recipe from '../models/Recipe.js'; // Make sure the path is correct for your file structure
 
 const router = express.Router();
+
 
 // Configure Multer for file upload
 const storage = multer.diskStorage({
@@ -17,7 +19,9 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Fetch all recipes for a specific user
+
 router.get('/user/:userId', async (req, res) => {
+
   try {
     const recipes = await Recipe.find({ userId: req.params.userId });
     res.json(recipes);
@@ -46,6 +50,7 @@ router.post('/', upload.single('image'), async (req, res) => {
       ingredients: ingredients ? ingredients.split(',').map(item => item.trim()) : [],
       steps,
       imageUrl: req.file ? `/uploads/${req.file.filename}` : null // Correct syntax for saving image URL
+
     });
     await recipe.save();
     res.status(201).json({ message: 'Recipe added successfully!', recipe });
@@ -100,4 +105,6 @@ router.delete('/:recipeId', async (req, res) => {
   }
 });
 
+
 export default router;
+

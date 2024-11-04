@@ -1,6 +1,7 @@
 import express from 'express';
 import Chef from '../models/chef.js'; 
 
+
 const router = express.Router();
 
 // Get chef details by userId
@@ -75,5 +76,6 @@ router.put('/:userId', async (req, res) => {
     res.status(500).json({ msg: 'Server error' });
   }
 });
+
 
 export default router;
