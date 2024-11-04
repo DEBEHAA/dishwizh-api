@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const chefSchema = new mongoose.Schema({
   userId: {
@@ -22,4 +22,4 @@ const chefSchema = new mongoose.Schema({
   experience: Number
 });
 
-module.exports = mongoose.model('Chef', chefSchema);
+export default mongoose.model('Chef', chefSchema);

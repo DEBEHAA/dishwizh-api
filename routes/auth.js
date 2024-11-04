@@ -1,7 +1,6 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';  // Import JWT for token generation
-import User from '../models/User.js';  // Make sure the path is correct for your setup
+import User from '../models/User.js';  // Ensure the path is correct for your setup
 
 const router = express.Router();
 
@@ -18,12 +17,7 @@ router.post('/register', async (req, res) => {
     user = new User({ name, email, password: hashedPassword });
     await user.save();
 
-    // Generate JWT Token
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '1h' // Token expires in 1 hour
-    });
-
-    res.status(201).json({ msg: 'User registered successfully', token, userId: user._id });
+    res.status(201).json({ msg: 'User registered successfully', userId: user._id });
   } catch (err) {
     console.error('Registration error:', err);
     res.status(500).send('Server error');
@@ -45,12 +39,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
 
-    // Generate JWT Token
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '1h'
-    });
-
-    res.status(200).json({ msg: 'Login successful', token, userId: user._id });
+    res.status(200).json({ msg: 'Login successful', userId: user._id });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).send('Server error');

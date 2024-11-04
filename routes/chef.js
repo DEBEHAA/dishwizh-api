@@ -1,5 +1,5 @@
 import express from 'express';
-import Chef from '../models/Chef.js'; 
+import Chef from '../models/chef.js'; 
 
 const router = express.Router();
 

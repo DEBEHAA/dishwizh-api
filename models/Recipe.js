@@ -1,5 +1,4 @@
-// models/Recipe.js
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const recipeSchema = new mongoose.Schema({
   userId: {
@@ -16,15 +15,15 @@ const recipeSchema = new mongoose.Schema({
     required: true
   },
   ingredients: {
-    type: [String], // Array of ingredient strings
+    type: [String], 
     required: true
   },
   steps: {
-    type: String, // Steps as a single string
+    type: String, 
     required: true
   },
   imageUrl: {
-    type: String, // URL or path to the uploaded image
+    type: String, 
     required: false
   },
   createdAt: {
@@ -33,4 +32,4 @@ const recipeSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('Recipe', recipeSchema);
+export default mongoose.model('Recipe', recipeSchema);
