@@ -8,6 +8,9 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
 import chefRouter from './routes/chef.js';
 import recipeRoutes from './routes/recipe.js';
+import userProfileRoutes from './routes/userProfile.js';
+import userRoutes from './routes/user.js';
+import adminRoutes from './routes/admin.js';
 
 dotenv.config(); // Load environment variables
 
@@ -16,7 +19,7 @@ const app = express();
 // CORS configuration
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'https://dishwizh.netlify.app'],
+    origin: ['http://localhost:5173'],
     credentials: true, // Allow credentials if needed
   })
 );
@@ -46,6 +49,10 @@ mongoose
 app.use('/api/auth', authRoutes);
 app.use('/api/chef', chefRouter);
 app.use('/api/recipe', recipeRoutes);
+app.use('/api/userProfile', userProfileRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/admin', adminRoutes);
+
 
 // Serve static files
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
