@@ -19,7 +19,7 @@ const app = express();
 // CORS configuration
 app.use(
   cors({
-    origin: ['http://localhost:5173'],
+    origin: ['http://localhost:5173', 'https://dishwizh.netlify.app'],
     credentials: true, // Allow credentials if needed
   })
 );
