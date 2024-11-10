@@ -1,37 +1,68 @@
 import express from 'express';
-import Chef from '../models/Chef.js'; 
-
+import Chef from '../models/Chef.js';
+import mongoose from 'mongoose';
 
 const router = express.Router();
 
-// Get chef details by userId
-router.get('/:userId', async (req, res) => {
+// Fetch all chefs or filter by search query
+router.get('/all', async (req, res) => {
   try {
-    const chef = await Chef.findOne({ userId: req.params.userId });
-    if (!chef) {
-      return res.status(404).json({ msg: 'Chef details not found' });
+    const { search } = req.query;
+
+    let query = {};
+    if (search) {
+      query = {
+        $or: [
+          { name: { $regex: search, $options: 'i' } },
+          { email: { $regex: search, $options: 'i' } },
+          { phone: { $regex: search, $options: 'i' } },
+        ],
+      };
     }
-    res.json(chef);
-  } catch (err) {
-    console.error('Error fetching chef details:', err);
-    res.status(500).send('Server error');
+
+    const chefs = await Chef.find(query).populate('userId', 'name email');
+    res.json(chefs);
+  } catch (error) {
+    console.error('Error fetching chefs:', error);
+    res.status(500).json({ message: 'Server error occurred while fetching chefs' });
   }
 });
 
-// Create chef details by userId
-router.post('/:userId', async (req, res) => {
-  const { phone, address, postalCode, age, gender, professionalChef, experience } = req.body;
-
+// Fetch chef details by userId
+router.get('/:userId', async (req, res) => {
   try {
-    // Check if a chef entry already exists
-    let chef = await Chef.findOne({ userId: req.params.userId });
-    if (chef) {
-      return res.status(400).json({ msg: 'Chef details already exist. Use update instead.' });
+    const { userId } = req.params;
+
+    // Validate userId as ObjectId
+    if (!mongoose.isValidObjectId(userId)) {
+      return res.status(400).json({ message: 'Invalid userId format' });
     }
 
-    // Create a new chef entry
-    chef = new Chef({
-      userId: req.params.userId,
+    const chef = await Chef.findOne({ userId }).populate('followers following', 'name email');
+    if (!chef) {
+      return res.status(404).json({ message: 'Chef not found' });
+    }
+
+    res.json(chef);
+  } catch (error) {
+    console.error('Error fetching chef details:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Add new chef details
+router.post('/', async (req, res) => {
+  const { userId, phone, address, postalCode, age, gender, professionalChef, experience } = req.body;
+
+  try {
+    // Check if chef already exists
+    const existingChef = await Chef.findOne({ userId });
+    if (existingChef) {
+      return res.status(400).json({ message: 'Chef details already exist. Use PUT to update.' });
+    }
+
+    const chef = new Chef({
+      userId,
       phone,
       address,
       postalCode,
@@ -40,27 +71,32 @@ router.post('/:userId', async (req, res) => {
       professionalChef,
       experience,
     });
-    
+
     await chef.save();
-    res.status(201).json({ msg: 'Chef details created successfully', chef });
-  } catch (err) {
-    console.error('Error creating chef details:', err);
-    res.status(500).json({ msg: 'Server error' });
+    res.status(201).json({ message: 'Chef details added successfully!', chef });
+  } catch (error) {
+    console.error('Error adding chef details:', error);
+    res.status(500).json({ message: 'Server error occurred while adding chef details.' });
   }
 });
 
-// Update chef details by userId
+// Update existing chef details
 router.put('/:userId', async (req, res) => {
+  const { userId } = req.params;
   const { phone, address, postalCode, age, gender, professionalChef, experience } = req.body;
 
   try {
-    let chef = await Chef.findOne({ userId: req.params.userId });
-
-    if (!chef) {
-      return res.status(404).json({ msg: 'Chef details not found. Use create instead.' });
+    // Validate userId as ObjectId
+    if (!mongoose.isValidObjectId(userId)) {
+      return res.status(400).json({ message: 'Invalid userId format' });
     }
 
-    // Update existing chef details
+    const chef = await Chef.findOne({ userId });
+    if (!chef) {
+      return res.status(404).json({ message: 'Chef not found. Use POST to add details.' });
+    }
+
+    // Update chef details
     chef.phone = phone || chef.phone;
     chef.address = address || chef.address;
     chef.postalCode = postalCode || chef.postalCode;
@@ -70,12 +106,11 @@ router.put('/:userId', async (req, res) => {
     chef.experience = experience || chef.experience;
 
     await chef.save();
-    res.status(200).json({ msg: 'Chef details updated successfully', chef });
-  } catch (err) {
-    console.error('Error updating chef details:', err);
-    res.status(500).json({ msg: 'Server error' });
+    res.status(200).json({ message: 'Chef details updated successfully!', chef });
+  } catch (error) {
+    console.error('Error updating chef details:', error);
+    res.status(500).json({ message: 'Server error occurred while updating chef details.' });
   }
 });
-
 
 export default router;

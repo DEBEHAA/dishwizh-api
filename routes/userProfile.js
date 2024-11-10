@@ -4,33 +4,29 @@ import Recipe from '../models/Recipe.js';
 
 const router = express.Router();
 
-// Get a chef's profile by userId
+// Get user profile
 router.get('/:userId', async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const { userId } = req.params;
 
-    // Fetch chef details
     const chef = await Chef.findOne({ userId }).populate('followers following', 'name email');
     if (!chef) {
       return res.status(404).json({ message: 'Chef not found' });
     }
 
-    // Fetch chef's recipes
     const recipes = await Recipe.find({ userId });
 
-    const profileData = {
-      name: chef.name || chef.userId.name,
-      email: chef.userId.email,
+    res.json({
+      name: chef.userId?.name || chef.name,
+      email: chef.userId?.email || chef.email,
       phone: chef.phone,
       address: chef.address,
       followersCount: chef.followers.length,
       followingCount: chef.following.length,
       recipes,
-    };
-
-    res.json(profileData);
+    });
   } catch (error) {
-    console.error(error);
+    console.error('Error fetching profile:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -38,8 +34,8 @@ router.get('/:userId', async (req, res) => {
 // Follow or unfollow a chef
 router.post('/:userId/follow', async (req, res) => {
   try {
-    const { userId } = req.params; // Chef to be followed
-    const { currentUserId } = req.body; // Logged-in user
+    const { userId } = req.params;
+    const { currentUserId } = req.body;
 
     if (userId === currentUserId) {
       return res.status(400).json({ message: "You can't follow yourself" });
@@ -55,11 +51,11 @@ router.post('/:userId/follow', async (req, res) => {
     const isFollowing = currentUserChef.following.includes(chefToFollow._id);
 
     if (isFollowing) {
-      // Unfollow the chef
+      // Unfollow
       currentUserChef.following = currentUserChef.following.filter((id) => id.toString() !== chefToFollow._id.toString());
       chefToFollow.followers = chefToFollow.followers.filter((id) => id.toString() !== currentUserChef._id.toString());
     } else {
-      // Follow the chef
+      // Follow
       currentUserChef.following.push(chefToFollow._id);
       chefToFollow.followers.push(currentUserChef._id);
     }
@@ -69,7 +65,7 @@ router.post('/:userId/follow', async (req, res) => {
 
     res.json({ message: isFollowing ? 'Unfollowed successfully' : 'Followed successfully' });
   } catch (error) {
-    console.error(error);
+    console.error('Error following/unfollowing chef:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

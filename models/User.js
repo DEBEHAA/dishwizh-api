@@ -1,6 +1,4 @@
-
 import mongoose from 'mongoose';
-
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -15,7 +13,11 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-  }
+  },
+  isAdmin: {
+    type: Boolean,
+    default: false, // Regular users are not admins by default
+  },
 });
 
 export default mongoose.model('User', userSchema);

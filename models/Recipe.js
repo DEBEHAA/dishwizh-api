@@ -1,41 +1,40 @@
-
 import mongoose from 'mongoose';
-
 
 const recipeSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
   },
   recipeName: {
     type: String,
-    required: true
+    required: true,
   },
   cuisineType: {
     type: String,
-    required: true
+    required: true,
   },
   ingredients: {
-
-    type: [String], 
-    required: true
+    type: [String],
+    required: true,
   },
   steps: {
-    type: String, 
-    required: true
+    type: String,
+    required: true,
   },
   imageUrl: {
-    type: String, 
-
-    required: false
+    type: String,
+    required: false,
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'approved'],
+    default: 'pending',
   },
   createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
-
 export default mongoose.model('Recipe', recipeSchema);
-
