@@ -36,38 +36,41 @@ router.post('/analytics', requireAdmin, async (req, res) => {
     ]);
 
     res.status(200).json({
-      totalUsers,
-      totalRecipes,
-      pendingRecipes,
-      approvedRecipes,
-      dailyNewUsers,
-      dailyNewRecipes,
+      success: true,
+      data: {
+        totalUsers,
+        totalRecipes,
+        pendingRecipes,
+        approvedRecipes,
+        dailyNewUsers,
+        dailyNewRecipes,
+      },
     });
   } catch (error) {
     console.error('Error fetching analytics:', error);
-    res.status(500).json({ message: 'Server error while fetching analytics' });
+    res.status(500).json({ success: false, message: 'Server error while fetching analytics' });
   }
 });
 
 // Get all users (Admin Only)
-router.post('/users', requireAdmin, async (req, res) => {
+router.get('/users', requireAdmin, async (req, res) => {
   try {
     const users = await User.find();
-    res.status(200).json(users);
+    res.status(200).json({ success: true, data: users });
   } catch (error) {
     console.error('Error fetching users:', error);
-    res.status(500).json({ message: 'Server error while fetching users' });
+    res.status(500).json({ success: false, message: 'Server error while fetching users' });
   }
 });
 
 // Get all recipes (Admin Only)
-router.post('/recipes', requireAdmin, async (req, res) => {
+router.get('/recipes', requireAdmin, async (req, res) => {
   try {
     const recipes = await Recipe.find().populate('userId', 'name email');
-    res.status(200).json(recipes);
+    res.status(200).json({ success: true, data: recipes });
   } catch (error) {
     console.error('Error fetching recipes:', error);
-    res.status(500).json({ message: 'Server error while fetching recipes' });
+    res.status(500).json({ success: false, message: 'Server error while fetching recipes' });
   }
 });
 
@@ -75,10 +78,10 @@ router.post('/recipes', requireAdmin, async (req, res) => {
 router.get('/recipes/pending', requireAdmin, async (req, res) => {
   try {
     const pendingRecipes = await Recipe.find({ status: 'pending' }).populate('userId', 'name email');
-    res.status(200).json(pendingRecipes);
+    res.status(200).json({ success: true, data: pendingRecipes });
   } catch (error) {
     console.error('Error fetching pending recipes:', error);
-    res.status(500).json({ message: 'Server error while fetching pending recipes' });
+    res.status(500).json({ success: false, message: 'Server error while fetching pending recipes' });
   }
 });
 
@@ -91,12 +94,12 @@ router.put('/recipes/approve/:id', requireAdmin, async (req, res) => {
       { new: true }
     );
     if (!recipe) {
-      return res.status(404).json({ message: 'Recipe not found.' });
+      return res.status(404).json({ success: false, message: 'Recipe not found' });
     }
-    res.status(200).json({ message: 'Recipe approved successfully!', recipe });
+    res.status(200).json({ success: true, message: 'Recipe approved successfully!', data: recipe });
   } catch (error) {
     console.error('Error approving recipe:', error);
-    res.status(500).json({ message: 'Server error while approving recipe.' });
+    res.status(500).json({ success: false, message: 'Server error while approving recipe' });
   }
 });
 
@@ -105,10 +108,10 @@ router.post('/users/create', requireAdmin, async (req, res) => {
   try {
     const newUser = new User(req.body);
     await newUser.save();
-    res.status(201).json(newUser);
+    res.status(201).json({ success: true, data: newUser });
   } catch (error) {
     console.error('Error adding user:', error);
-    res.status(500).json({ message: 'Server error while adding user' });
+    res.status(500).json({ success: false, message: 'Server error while adding user' });
   }
 });
 
@@ -117,12 +120,12 @@ router.put('/users/:id', requireAdmin, async (req, res) => {
   try {
     const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updatedUser) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
-    res.status(200).json(updatedUser);
+    res.status(200).json({ success: true, data: updatedUser });
   } catch (error) {
     console.error('Error updating user:', error);
-    res.status(500).json({ message: 'Server error while updating user' });
+    res.status(500).json({ success: false, message: 'Server error while updating user' });
   }
 });
 
@@ -131,12 +134,12 @@ router.delete('/users/:id', requireAdmin, async (req, res) => {
   try {
     const deletedUser = await User.findByIdAndDelete(req.params.id);
     if (!deletedUser) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
-    res.status(200).json({ message: 'User deleted successfully' });
+    res.status(200).json({ success: true, message: 'User deleted successfully' });
   } catch (error) {
     console.error('Error deleting user:', error);
-    res.status(500).json({ message: 'Server error while deleting user' });
+    res.status(500).json({ success: false, message: 'Server error while deleting user' });
   }
 });
 
@@ -145,10 +148,10 @@ router.post('/recipes/create', requireAdmin, async (req, res) => {
   try {
     const newRecipe = new Recipe(req.body);
     await newRecipe.save();
-    res.status(201).json(newRecipe);
+    res.status(201).json({ success: true, data: newRecipe });
   } catch (error) {
     console.error('Error adding recipe:', error);
-    res.status(500).json({ message: 'Server error while adding recipe' });
+    res.status(500).json({ success: false, message: 'Server error while adding recipe' });
   }
 });
 
@@ -157,12 +160,12 @@ router.delete('/recipes/:id', requireAdmin, async (req, res) => {
   try {
     const deletedRecipe = await Recipe.findByIdAndDelete(req.params.id);
     if (!deletedRecipe) {
-      return res.status(404).json({ message: 'Recipe not found' });
+      return res.status(404).json({ success: false, message: 'Recipe not found' });
     }
-    res.status(200).json({ message: 'Recipe deleted successfully' });
+    res.status(200).json({ success: true, message: 'Recipe deleted successfully' });
   } catch (error) {
     console.error('Error deleting recipe:', error);
-    res.status(500).json({ message: 'Server error while deleting recipe' });
+    res.status(500).json({ success: false, message: 'Server error while deleting recipe' });
   }
 });
 
