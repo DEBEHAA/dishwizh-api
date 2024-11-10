@@ -24,7 +24,7 @@ const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
     origin: ['http://localhost:5173', 'https://dishwizh.netlify.app'], // Allow these origins
-    methods: ['GET', 'POST'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   },
 });
@@ -32,6 +32,7 @@ const io = new Server(httpServer, {
 // Middleware
 app.use(cors({
   origin: ['http://localhost:5173', 'https://dishwizh.netlify.app'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
 }));
 app.use(express.json()); // Parse JSON body
