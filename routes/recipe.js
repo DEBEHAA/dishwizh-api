@@ -2,11 +2,10 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import Recipe from '../models/Recipe.js'; // Ensure the path to Recipe model is correct
-import requireAdmin from '../middleware/requireAdmin.js'; // Middleware to ensure admin access
 
 const router = express.Router();
 
-// Configure Multer for file upload
+// Configure Multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/'); // Folder for uploaded images
@@ -18,19 +17,19 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Fetch all recipes for a specific user (approved only)
+// Fetch all recipes for a specific user
 router.get('/user/:userId', async (req, res) => {
   try {
-    console.log('Fetching recipes for userId:', req.params.userId); // Debug
-    const recipes = await Recipe.find({ userId: req.params.userId, status: 'approved' }); // Fetch only approved recipes
-    res.status(200).json(recipes); // Always return 200 with the array (even if empty)
+    console.log(`Fetching recipes for userId: ${req.params.userId}`);
+    const recipes = await Recipe.find({ userId: req.params.userId }); // Fetch all recipes (approved and pending)
+    res.status(200).json(recipes); // Return recipes (even if empty)
   } catch (error) {
     console.error('Error fetching recipes:', error);
-    res.status(500).json({ message: 'Failed to fetch recipes. Please try again.' });
+    res.status(500).json({ message: 'Failed to fetch recipes. Please try again later.' });
   }
 });
 
-// Create a new recipe with an image upload (default status: pending)
+// Create a new recipe with an image upload
 router.post('/', upload.single('image'), async (req, res) => {
   const { userId, recipeName, cuisineType, ingredients, steps } = req.body;
 
@@ -52,26 +51,29 @@ router.post('/', upload.single('image'), async (req, res) => {
     });
 
     await recipe.save();
-    res.status(201).json({ message: 'Recipe added successfully! Pending approval.', recipe });
+    res.status(201).json({ message: 'Recipe added successfully and is pending approval.', recipe });
   } catch (error) {
     console.error('Error adding recipe:', error);
     res.status(500).json({ message: 'Failed to add recipe.' });
   }
 });
 
-// Fetch all pending recipes (Admin Only)
-router.get('/pending', requireAdmin, async (req, res) => {
+// Fetch all recipes (approved + pending)
+router.get('/all', async (req, res) => {
   try {
-    const pendingRecipes = await Recipe.find({ status: 'pending' }).populate('userId', 'name email');
-    res.status(200).json(pendingRecipes);
+    const recipes = await Recipe.find(); // Fetch all recipes
+    if (!recipes.length) {
+      return res.status(404).json({ message: 'No recipes found.' });
+    }
+    res.status(200).json(recipes);
   } catch (error) {
-    console.error('Error fetching pending recipes:', error);
-    res.status(500).json({ message: 'Failed to fetch pending recipes.' });
+    console.error('Error fetching all recipes:', error);
+    res.status(500).json({ message: 'Failed to fetch all recipes.' });
   }
 });
 
-// Approve a specific recipe (Admin Only)
-router.put('/approve/:recipeId', requireAdmin, async (req, res) => {
+// Approve a specific recipe
+router.put('/approve/:recipeId', async (req, res) => {
   try {
     const updatedRecipe = await Recipe.findByIdAndUpdate(
       req.params.recipeId,
@@ -83,20 +85,10 @@ router.put('/approve/:recipeId', requireAdmin, async (req, res) => {
       return res.status(404).json({ message: 'Recipe not found.' });
     }
 
-    res.status(200).json({ message: 'Recipe approved successfully!', updatedRecipe });
+    res.status(200).json({ message: 'Recipe approved successfully.', updatedRecipe });
   } catch (error) {
     console.error('Error approving recipe:', error);
     res.status(500).json({ message: 'Failed to approve recipe.' });
-  }
-});
-router.get('/user/:userId', async (req, res) => {
-  try {
-    console.log('Fetching recipes for userId:', req.params.userId); // Debug
-    const recipes = await Recipe.find({ userId: req.params.userId }); // Fetch both approved and pending
-    res.status(200).json(recipes);
-  } catch (error) {
-    console.error('Error fetching recipes:', error);
-    res.status(500).json({ message: 'Failed to fetch recipes. Please try again.' });
   }
 });
 
@@ -110,6 +102,7 @@ router.put('/:recipeId', upload.single('image'), async (req, res) => {
     ingredients: ingredients ? ingredients.split(',').map((item) => item.trim()) : [],
     steps,
   };
+
   if (req.file) {
     updatedFields.imageUrl = `/uploads/${req.file.filename}`;
   }
@@ -125,7 +118,7 @@ router.put('/:recipeId', upload.single('image'), async (req, res) => {
       return res.status(404).json({ message: 'Recipe not found.' });
     }
 
-    res.json({ message: 'Recipe updated successfully!', updatedRecipe });
+    res.status(200).json({ message: 'Recipe updated successfully.', updatedRecipe });
   } catch (error) {
     console.error('Error updating recipe:', error);
     res.status(500).json({ message: 'Failed to update recipe.' });
@@ -141,11 +134,24 @@ router.delete('/:recipeId', async (req, res) => {
       return res.status(404).json({ message: 'Recipe not found.' });
     }
 
-    res.json({ message: 'Recipe deleted successfully!' });
+    res.status(200).json({ message: 'Recipe deleted successfully.' });
   } catch (error) {
     console.error('Error deleting recipe:', error);
     res.status(500).json({ message: 'Failed to delete recipe.' });
   }
 });
+router.get('/:recipeId', async (req, res) => {
+  try {
+    const recipe = await Recipe.findById(req.params.recipeId);
+    if (!recipe) {
+      return res.status(404).json({ message: 'Recipe not found.' });
+    }
+    res.status(200).json(recipe);
+  } catch (error) {
+    console.error('Error fetching recipe:', error);
+    res.status(500).json({ message: 'Failed to fetch recipe.' });
+  }
+});
+
 
 export default router;

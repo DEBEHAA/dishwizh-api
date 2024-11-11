@@ -6,11 +6,11 @@ const seedAdminUser = async () => {
     const existingAdmin = await User.findOne({ email: 'admin@gmail.com' });
 
     if (!existingAdmin) {
-       // Hash the default password
+      const hashedPassword = await bcrypt.hash('123', 10); // Hash the default password
       const adminUser = new User({
         name: 'Admin',
         email: 'admin@gmail.com',
-        password: '1234',
+        password: hashedPassword,
         isAdmin: true,
       });
 
