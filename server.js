@@ -20,6 +20,8 @@ dotenv.config(); // Load environment variables
 
 const app = express();
 const httpServer = createServer(app);
+
+// CORS Configuration for Socket.IO
 const io = new Server(httpServer, {
   cors: {
     origin: ['http://localhost:5173', 'https://dishwizh.netlify.app'], // Allowed origins
@@ -30,11 +32,16 @@ const io = new Server(httpServer, {
 
 // Middleware for parsing JSON
 app.use(express.json());
-app.use(cors({
-  origin: ['http://localhost:5173', 'https://dishwizh.netlify.app'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true,
-}));
+
+// CORS Middleware for Express Routes
+app.use(
+  cors({
+    origin: ['http://localhost:5173', 'https://dishwizh.netlify.app'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  })
+);
 
 // Middleware for request logging
 app.use((req, res, next) => {
@@ -90,8 +97,12 @@ io.on('connection', (socket) => {
 
   // Join room for real-time chat
   socket.on('joinRoom', (room) => {
-    socket.join(room);
-    console.log(`User ${socket.id} joined room: ${room}`);
+    if (room) {
+      socket.join(room);
+      console.log(`User ${socket.id} joined room: ${room}`);
+    } else {
+      console.warn(`Room not provided for user ${socket.id}`);
+    }
   });
 
   // Handle message sending
